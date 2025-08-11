@@ -43,7 +43,6 @@ const Header = ({ toggleSidebar, findTaskHandler, searched, setFilteredTasks ,se
             <FaSearch />
           </button>
         </div>
-
         {/* Right: Date */}
         <div className="text-sm text-blue-500 text-right sm:text-left w-full sm:w-auto">
           {today}

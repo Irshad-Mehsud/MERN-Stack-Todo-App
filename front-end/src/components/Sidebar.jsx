@@ -9,7 +9,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       className={`w-48 h-screen bg-red-400 p-4 flex-col justify-between rounded ml-2
         ${isOpen ? "flex" : "hidden"} lg:flex fixed lg:static z-50`}
     >
-      {/* Profile Section */}
+  
       <div className="text-center">
         <img
           src={ProfileImg}
