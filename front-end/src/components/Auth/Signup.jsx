@@ -3,6 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 
 const Signup = () => {
   const navigate = useNavigate();
+ 
+
+
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -43,8 +46,10 @@ const Signup = () => {
         method: "POST",
         body: formPayload
       });
-
+      
       const data = await res.json();
+       localStorage.setItem("userId", data.userId); // store MongoDB _id
+       console.log("User ID saved:", data.userId);
       if (res.ok) {
         alert("Signup successful!");
         navigate("/login");

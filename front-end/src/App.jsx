@@ -3,7 +3,7 @@ import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import TaskStats from "./components/TaskStats";
 import TaskList from "./components/TaskList";
-
+import { useEffect } from "react";
 const App = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searched, setSearched] = useState("");
@@ -40,6 +40,31 @@ const App = () => {
   const total = tasks.length;
   const completed = tasks.filter((t) => t.status === "Completed").length;
   const inProgress = tasks.filter((t) => t.status === "In Progress").length;
+ const [user, setUser] = useState(null);
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      console.error("User ID not found in localStorage");
+      return;
+    }
+
+    fetch(`http://localhost:5000/api/users/${userId}`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch user: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setUser(data.data); // Assuming your API returns { data: {...user} }
+      })
+      .catch((err) => console.error(err));
+  }, []);
+    
+
+
+
+
 
   return (
     <div className="h-screen flex flex-col">
@@ -69,7 +94,7 @@ const App = () => {
         {/* Main dashboard content */}
         <div className="w-full flex-1 overflow-y-auto p-4 bg-gray-50">
           <h2 className="text-2xl font-semibold mb-4">
-            Welcome back, Sundar 👋
+            Welcome back, {user?.username} 👋
           </h2>
           <TaskStats total={total} completed={completed} inProgress={inProgress} />
           <TaskList tasks={filteredTasks !== null ? filteredTasks : tasks} />
