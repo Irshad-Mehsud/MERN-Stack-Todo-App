@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
+import uploadFile from "../uploads/services/index.js";
 
 const postUser = async (req, res) => {
   try {
@@ -14,26 +15,31 @@ const postUser = async (req, res) => {
     // Hash password
     const hashedPassword = bcrypt.hashSync(password, 10);
 
-    // Handle image (from multer)
-    let profileImagePath = null;
+    // Handle image upload to Cloudinary
+    let cloudinaryUrl = null;
     if (req.file) {
-      profileImagePath = req.file.filename; // or `req.file.path` if you want full path
+      try {
+        // Upload to Cloudinary using the existing service
+        cloudinaryUrl = await uploadFile(req.file.path);
+      } catch (uploadError) {
+        console.error("Cloudinary upload failed:", uploadError.message);
+        // Continue without image if upload fails
+        cloudinaryUrl = null;
+      }
     }
 
-    // Create user
+    // Create user with Cloudinary URL
     const model = await User.create({
       username,
       email,
       password: hashedPassword,
-      profileImage: profileImagePath
+      profileImage: cloudinaryUrl
     });
 
     res.status(201).json({
       message: "User created successfully",
       userId: model._id,
-       profileImage: user.profileImage
-    ? `http://localhost:5000/uploads/${user.profileImage}`
-    : null,
+      profileImage: model.profileImage,
       data: model
     });
   } catch (error) {
