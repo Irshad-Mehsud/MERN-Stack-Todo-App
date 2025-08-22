@@ -4,8 +4,11 @@ node_modules/
 # Environment variables
 .env
 
-# Uploaded files
-uploads/
+# Uploaded files (ignore uploaded content but keep service files)
+uploads/*
+!uploads/services/
+uploads/services/*
+!uploads/services/index.js
 
 # Build outputs
 dist/

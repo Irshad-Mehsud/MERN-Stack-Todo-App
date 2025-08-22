@@ -1,6 +1,6 @@
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
-import uploadFile from "../uploads/services/index.js";
+import uploadFile from "../services/cloudinary.js";
 
 const postUser = async (req, res) => {
   try {
