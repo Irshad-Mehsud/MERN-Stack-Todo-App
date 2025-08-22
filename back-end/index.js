@@ -5,13 +5,17 @@ import cors from 'cors';
 
 const app = express();
 app.use(cors());
-const PORT = 5000;
+const PORT = 3000;
 
 // Middleware to parse JSON
 app.use(express.json());
 
 // Routes
 app.use('/api', router);
+
+app.get('/', (req, res) => {
+    res.send('API is running');
+});
 
 // MongoDB connection events
 mongoose.connection.on('error', (err) => {
@@ -22,7 +26,6 @@ mongoose.connection.on('connected', () => {
     console.log('Connected to MongoDB');
 });
 
-// Handle favicon.ico request to prevent error
 app.get("/favicon.ico", (req, res) => res.status(204).end());
 
 
