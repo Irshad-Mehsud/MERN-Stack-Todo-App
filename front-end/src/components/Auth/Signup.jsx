@@ -42,7 +42,7 @@ const Signup = () => {
     if (image) formPayload.append("profileImage", image);
 
     try {
-      const res = await fetch("http://localhost:5000/api/signup", {
+      const res = await fetch("http://localhost:3000/api/signup", {
         method: "POST",
         body: formPayload
       });

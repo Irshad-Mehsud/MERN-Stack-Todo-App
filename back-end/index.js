@@ -13,9 +13,9 @@ app.use(express.json());
 // Routes
 app.use('/api', router);
 
-app.get('/', (req, res) => {
-    res.send('API is running');
-});
+// app.get('/', (req, res) => {
+//     res.send('API is running');
+// });
 
 // MongoDB connection events
 mongoose.connection.on('error', (err) => {
