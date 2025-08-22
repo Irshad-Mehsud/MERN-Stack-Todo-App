@@ -22,6 +22,10 @@ mongoose.connection.on('connected', () => {
     console.log('Connected to MongoDB');
 });
 
+// Handle favicon.ico request to prevent error
+app.get("/favicon.ico", (req, res) => res.status(204).end());
+
+
 // Start server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
