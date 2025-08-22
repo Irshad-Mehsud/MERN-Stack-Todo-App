@@ -13,7 +13,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       return;
     }
 
-    fetch(`http://localhost:5000/api/users/${userId}`)
+    fetch(`http://localhost:3000/api/users/${userId}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Failed to fetch user: ${response.status}`);
