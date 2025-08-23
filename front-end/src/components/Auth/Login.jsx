@@ -1,5 +1,10 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import cors from "cors";
+app.use(cors({
+  origin: "https://mern-stack-todo-app-psi.vercel.app",
+  credentials: true,
+}));
 
 const Login = () => {
   const navigate = useNavigate();
