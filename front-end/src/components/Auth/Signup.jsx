@@ -1,12 +1,5 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import cors from "cors";
-app.use(cors({
-  origin: "https://mern-stack-todo-app-psi.vercel.app",
-  credentials: true,
-}));
-
-
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -49,7 +42,7 @@ const Signup = () => {
     if (image) formPayload.append("profileImage", image);
 
     try {
-      const res = await fetch("https://mern-stack-backend.vercel.app/api/signup", {
+      const res = await fetch("http://localhost:3000/api/signup", {
         method: "POST",
         body: formPayload
       });

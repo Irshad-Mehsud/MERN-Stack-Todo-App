@@ -1,10 +1,5 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import cors from "cors";
-app.use(cors({
-  origin: "https://mern-stack-todo-app-psi.vercel.app",
-  credentials: true,
-}));
 
 const Login = () => {
   const navigate = useNavigate();
@@ -20,7 +15,7 @@ const Login = () => {
   e.preventDefault();
 
   try {
-    const res = await fetch("https://mern-stack-backend.vercel.app/api/login", {
+    const res = await fetch("http://localhost:3000/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
