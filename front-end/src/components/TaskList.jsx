@@ -1,71 +1,123 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-const TaskList = ({ tasks: initialTasks }) => {
-  const [tasks, setTasks] = useState(initialTasks);
+const TaskList = () => {
+  const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
   const [editIndex, setEditIndex] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const formatDateTime = () => {
-    const now = new Date();
-    const date = now.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-    const time = now.toLocaleTimeString(undefined, {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    return { date, time };
-  };
+  // ✅ Fetch tasks for current user
+  useEffect(() => {
+    const userId = localStorage.getItem("userId"); // Get from localStorage
+    console.log("Fetched User ID:", userId);
 
-  const handleAddTask = () => {
-    if (newTask.trim() === "") return;
-
-    const { date, time } = formatDateTime();
-
-    if (editIndex !== null) {
-      const updated = [...tasks];
-      updated[editIndex].title = newTask;
-      setTasks(updated);
-      setEditIndex(null);
-    } else {
-      setTasks([
-        ...tasks,
-        {
-          title: newTask,
-          status: "Not Started",
-          date,
-          time,
-        },
-      ]);
+    if (!userId) {
+      console.error("No user found. Please login first.");
+      return;
     }
 
-    setNewTask("");
+    // ✅ Fetch only this user's tasks
+    fetch(`http://localhost:4000/api/users/${userId}/tasks`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.data) {
+          setTasks(data.data); // backend sends { message, data: [...] }
+        } else {
+          setTasks([]);
+        }
+      })
+      .catch((err) => console.error("Error fetching tasks:", err));
+  }, []);
+
+  // ✅ Add Task
+  const handleAddTask = async () => {
+    if (newTask.trim() === "") return;
+
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      alert("No user found. Please login first.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const response = await fetch("http://localhost:4000/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newTask,
+          user: userId, // ✅ send logged in userId
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to add task");
+      }
+
+      setTasks([...tasks, data.task]); // append new task
+      setNewTask("");
+    } catch (error) {
+      console.error("Error adding task:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDelete = (index) => {
-    const updated = tasks.filter((_, i) => i !== index);
-    setTasks(updated);
+  // ✅ Update Task
+  const handleUpdateTask = async () => {
+    const taskId = tasks[editIndex]._id;
+
+    try {
+      setLoading(true);
+
+      const response = await fetch(`http://localhost:4000/api/tasks/${taskId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: newTask }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Failed to update task");
+
+      const updatedTasks = [...tasks];
+      updatedTasks[editIndex] = data.task; // backend returns { task }
+      setTasks(updatedTasks);
+
+      setNewTask("");
+      setEditIndex(null);
+    } catch (err) {
+      console.error("Error updating task:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // ✅ Delete Task
+  const handleDelete = async (taskId) => {
+    try {
+      await fetch(`http://localhost:4000/api/tasks/${taskId}`, {
+        method: "DELETE",
+      });
+      setTasks(tasks.filter((task) => task._id !== taskId));
+    } catch (err) {
+      console.error("Error deleting task:", err);
+    }
+  };
+
+  // ✅ Edit Task (load task into input)
   const handleEdit = (index) => {
     setNewTask(tasks[index].title);
     setEditIndex(index);
   };
 
-  const updateStatus = (index, newStatus) => {
-    const updated = [...tasks];
-    updated[index].status = newStatus;
-    setTasks(updated);
-  };
-
   return (
     <div className="bg-white p-6 rounded-lg shadow-xl">
-      {/* Heading */}
       <h2 className="text-center text-2xl font-semibold mb-4">Add Your Task</h2>
 
-      {/* Input and Button */}
+      {/* Input + Button */}
       <div className="flex flex-col sm:flex-row gap-3 items-center mb-6">
         <input
           type="text"
@@ -75,59 +127,34 @@ const TaskList = ({ tasks: initialTasks }) => {
           placeholder="Enter task title"
         />
         <button
-          onClick={handleAddTask}
+          onClick={editIndex !== null ? handleUpdateTask : handleAddTask}
+          disabled={loading}
           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
         >
-          {editIndex !== null ? "Update Task" : "Add Task"}
+          {editIndex !== null
+            ? "Update Task"
+            : loading
+            ? "Adding..."
+            : "Add Task"}
         </button>
       </div>
 
-      {/* Task Cards */}
+      {/* Task List */}
       <div className="grid gap-4">
         {tasks.length === 0 ? (
           <p className="text-center text-gray-500">No tasks yet.</p>
         ) : (
           tasks.map((task, index) => (
             <div
-              key={index}
+              key={task._id}
               className="bg-gray-100 p-4 rounded-md shadow-md flex flex-col gap-2"
             >
               <div className="flex justify-between items-center">
                 <h4 className="font-semibold text-lg">{task.title}</h4>
-                <span className="text-xs text-gray-600">
-                  {task.date} | {task.time}
-                </span>
               </div>
-
-              <p className="text-sm">
-                Status:{" "}
-                <span
-                  className={`font-medium ${
-                    task.status === "Completed"
-                      ? "text-green-600"
-                      : task.status === "In Progress"
-                      ? "text-yellow-600"
-                      : "text-red-500"
-                  }`}
-                >
-                  {task.status}
-                </span>
-              </p>
 
               {/* Buttons */}
               <div className="flex gap-2 flex-wrap mt-2">
-                <button
-                  onClick={() => updateStatus(index, "Completed")}
-                  className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-                >
-                  Mark Completed
-                </button>
-                <button
-                  onClick={() => updateStatus(index, "In Progress")}
-                  className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
-                >
-                  Mark In Progress
-                </button>
                 <button
                   onClick={() => handleEdit(index)}
                   className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
@@ -135,7 +162,7 @@ const TaskList = ({ tasks: initialTasks }) => {
                   Update
                 </button>
                 <button
-                  onClick={() => handleDelete(index)}
+                  onClick={() => handleDelete(task._id)}
                   className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                 >
                   Delete

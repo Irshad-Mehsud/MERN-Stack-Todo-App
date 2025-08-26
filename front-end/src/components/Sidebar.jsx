@@ -8,12 +8,13 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
-    if (!userId) {
+    const tokenVerification = localStorage.getItem("token");
+    if (!userId && !tokenVerification) {
       console.error("User ID not found in localStorage");
       return;
     }
 
-    fetch(`http://localhost:3000/api/users/${userId}`)
+    fetch(`http://localhost:4000/api/users/${userId}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Failed to fetch user: ${response.status}`);

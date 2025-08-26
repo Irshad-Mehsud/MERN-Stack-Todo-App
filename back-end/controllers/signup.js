@@ -1,7 +1,9 @@
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
 import uploadFile from "../services/cloudinary.js";
-
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
 const postUser = async (req, res) => {
   try {
     // Extract data
@@ -35,12 +37,17 @@ const postUser = async (req, res) => {
       password: hashedPassword,
       profileImage: cloudinaryUrl
     });
+     const token = jwt.sign(
+            { email: model.email },
+            process.env.JWT_SECRET
+        );
 
     res.status(201).json({
       message: "User created successfully",
-      userId: model._id,
-      profileImage: model.profileImage,
-      data: model
+      // userId: model._id,
+      // profileImage: model.profileImage,
+      data: model,
+      token: token
     });
   } catch (error) {
     console.error("Error creating user:", error.message);
