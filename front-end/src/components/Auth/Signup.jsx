@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
 const Signup = () => {
   const navigate = useNavigate();
  
@@ -42,15 +41,12 @@ const Signup = () => {
     if (image) formPayload.append("profileImage", image);
 
     try {
-      const res = await fetch("http://localhost:4000/api/signup", {
+      const res = await fetch("http://localhost:5000/api/signup", {
         method: "POST",
         body: formPayload
       });
       
       const data = await res.json();
-       localStorage.setItem("userId", data.userId); // store MongoDB _id
-       localStorage.setItem("token", data.token); // store JWT token
-       console.log("User ID saved:", data.userId);
       if (res.ok) {
         alert("Signup successful!");
         navigate("/login");

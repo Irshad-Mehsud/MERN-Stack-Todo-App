@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-
 const TaskList = () => {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
@@ -11,13 +10,14 @@ const TaskList = () => {
     const userId = localStorage.getItem("userId"); // Get from localStorage
     console.log("Fetched User ID:", userId);
 
-    if (!userId) {
+
+    if (!userId || userId === "undefined") {
       console.error("No user found. Please login first.");
       return;
     }
 
     // ✅ Fetch only this user's tasks
-    fetch(`http://localhost:4000/api/users/${userId}/tasks`)
+    fetch(`http://localhost:5000/api/users/${userId}/tasks`)
       .then((res) => res.json())
       .then((data) => {
         if (data.data) {
@@ -42,7 +42,7 @@ const TaskList = () => {
     try {
       setLoading(true);
 
-      const response = await fetch("http://localhost:4000/api/tasks", {
+      const response = await fetch("http://localhost:5000/api/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -73,7 +73,7 @@ const TaskList = () => {
     try {
       setLoading(true);
 
-      const response = await fetch(`http://localhost:4000/api/tasks/${taskId}`, {
+      const response = await fetch(`http://localhost:5000/api/tasks/${taskId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title: newTask }),
@@ -98,7 +98,7 @@ const TaskList = () => {
   // ✅ Delete Task
   const handleDelete = async (taskId) => {
     try {
-      await fetch(`http://localhost:4000/api/tasks/${taskId}`, {
+      await fetch(`http://localhost:5000/api/tasks/${taskId}`, {
         method: "DELETE",
       });
       setTasks(tasks.filter((task) => task._id !== taskId));

@@ -1,6 +1,8 @@
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
-
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -19,10 +21,15 @@ const loginUser = async (req, res) => {
 
     // Remove password from returned object
     const { password: _, ...userData } = user.toObject();
-
+       const token = jwt.sign(
+                { email: userData.email },
+                process.env.JWT_SECRET
+            );
     res.status(200).json({
       message: "User login successful",
-      data: userData
+      data: userData,
+      userId: userData._id,
+      token: token // token generated in middleware
     });
 
   } catch (error) {

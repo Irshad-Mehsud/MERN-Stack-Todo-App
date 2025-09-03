@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
 const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -15,13 +14,16 @@ const Login = () => {
   e.preventDefault();
 
   try {
-    const res = await fetch("http://localhost:4000/api/login", {
+    const res = await fetch("http://localhost:5000/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
     });
 
     const data = await res.json();
+    localStorage.setItem("userId", data.userId); // store MongoDB _id
+    localStorage.setItem("token", data.token); // store JWT token
+    console.log("User ID saved:", data.userId);
 
     if (!res.ok) {
       alert(data.msg || "Login failed");

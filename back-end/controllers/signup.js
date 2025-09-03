@@ -44,8 +44,8 @@ const postUser = async (req, res) => {
 
     res.status(201).json({
       message: "User created successfully",
-      // userId: model._id,
-      // profileImage: model.profileImage,
+      userId: model._id,
+      profileImage: model.profileImage,
       data: model,
       token: token
     });
