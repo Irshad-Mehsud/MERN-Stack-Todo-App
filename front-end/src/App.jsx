@@ -3,6 +3,7 @@ import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import TaskStats from "./components/TaskStats";
 import TaskList from "./components/TaskList";
+import { TaskProvider } from "../context/TaskProvider.jsx";
 
 const App = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -68,8 +69,12 @@ const App = () => {
           </h2>
 
           {/* keep TaskStats + TaskList if you need them */}
-          <TaskStats total={0} completed={0} inProgress={0} />
-          <TaskList tasks={[]} />
+
+          <TaskProvider> 
+            <TaskStats/>
+              <TaskList tasks={[]} />
+         </TaskProvider>
+  
         </div>
       </div>
     </div>

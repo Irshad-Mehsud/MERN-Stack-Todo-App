@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from "react";
+import { useContext } from "react";
+import { TaskContext } from "../../context/TaskProvider.jsx";
 const TaskList = () => {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
   const [editIndex, setEditIndex] = useState(null);
   const [loading, setLoading] = useState(false);
+  const { setCompleted: setCompletedTasks } = useContext(TaskContext);
 
   // ✅ Fetch tasks for current user
   useEffect(() => {
     const userId = localStorage.getItem("userId"); // Get from localStorage
     console.log("Fetched User ID:", userId);
-
 
     if (!userId || userId === "undefined") {
       console.error("No user found. Please login first.");
@@ -30,41 +32,52 @@ const TaskList = () => {
   }, []);
 
   // ✅ Add Task
-  const handleAddTask = async () => {
-    if (newTask.trim() === "") return;
+const handleAddTask = async () => {
+  if (newTask.trim() === "") return;
 
-    const userId = localStorage.getItem("userId");
-    if (!userId) {
-      alert("No user found. Please login first.");
-      return;
+  const userId = localStorage.getItem("userId");
+  if (!userId) {
+    alert("No user found. Please login first.");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const response = await fetch("http://localhost:5000/api/tasks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: newTask,
+        user: userId, // ✅ send logged in userId
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to add task");
     }
 
-    try {
-      setLoading(true);
+    const newTaskObj = data.task; // backend sends { task: {...} }
+    const taskId = newTaskObj._id;
 
-      const response = await fetch("http://localhost:5000/api/tasks", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: newTask,
-          user: userId, // ✅ send logged in userId
-        }),
-      });
+    console.log("Task ID:", taskId);
 
-      const data = await response.json();
+    // ✅ append new task to state
+    setTasks((prevTasks) => [...prevTasks, newTaskObj]);
 
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to add task");
-      }
+    // ✅ store taskId in localStorage
+    localStorage.setItem("lastTaskId", taskId);
 
-      setTasks([...tasks, data.task]); // append new task
-      setNewTask("");
-    } catch (error) {
-      console.error("Error adding task:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setNewTask("");
+  } catch (error) {
+    console.error("Error adding task:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // ✅ Update Task
   const handleUpdateTask = async () => {
@@ -73,14 +86,18 @@ const TaskList = () => {
     try {
       setLoading(true);
 
-      const response = await fetch(`http://localhost:5000/api/tasks/${taskId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: newTask }),
-      });
+      const response = await fetch(
+        `http://localhost:5000/api/tasks/${taskId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: newTask }),
+        }
+      );
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Failed to update task");
+      if (!response.ok)
+        throw new Error(data.message || "Failed to update task");
 
       const updatedTasks = [...tasks];
       updatedTasks[editIndex] = data.task; // backend returns { task }
@@ -105,6 +122,15 @@ const TaskList = () => {
     } catch (err) {
       console.error("Error deleting task:", err);
     }
+  };
+
+    const handleCompletedTask = async (userId) => {
+    const taskId = localStorage.getItem("lastTaskId");
+   if (taskId){
+    const completedTaskCout = 0;
+    setCompletedTasks((taskId) => completedTaskCout + 1);
+    
+   }
   };
 
   // ✅ Edit Task (load task into input)
@@ -166,6 +192,19 @@ const TaskList = () => {
                   className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                 >
                   Delete
+                </button>
+                <button
+                  onClick={() => handleCompletedTask(task._id)}
+                  className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                >
+                  Completed
+                </button>
+
+                <button
+                  onClick={() => handleDelete(task._id)}
+                  className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                >
+                  InProgress
                 </button>
               </div>
             </div>
