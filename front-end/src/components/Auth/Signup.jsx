@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState , useEffect} from "react";
 import { Link, useNavigate } from "react-router-dom";
 const Signup = () => {
   const navigate = useNavigate();
@@ -14,6 +14,13 @@ const Signup = () => {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
 
+  useEffect(()=>{
+      const userId = localStorage.getItem("userId");
+      const token = localStorage.getItem("token");
+      if(userId && token){
+        navigate("/dashboard");
+      }
+    },[])
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
